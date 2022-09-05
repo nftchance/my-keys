@@ -14,7 +14,7 @@ CONFIG = {
 
 def run():
     repo_manager = RepoManager()
-    repo_manager.start()
+    repo_manager.start_retrieval()
 
 # Run the primary process
 def main():

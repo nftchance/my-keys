@@ -16,11 +16,15 @@ class RepoManager:
     TAGS = [
         'solidity',
         'hardhat',
+        'truffle',
+        'brownie',
+        'web3',
+        'ethers',
+        'ganache',
     ]
 
     LANGUAGES = [
         'solidity',
-        'javascript',
     ]
 
     BLOCKED_PATHS = [
@@ -44,14 +48,31 @@ class RepoManager:
         self.repo_calls = {}
         self.repos = {}
 
-    def start(self):
-        print("RepoManager started")
+    def start_retrieval(self):
+        print("RepoManager started retrieval")
 
         for tag in self.TAGS:
-            self.sync_repos(self.get_repos_by_tag(tag))
+            for repo in self.get_repos_by_tag(tag):
+                self._retrieve_or_create_repo(repo)
 
         for language in self.LANGUAGES:
-            self.sync_repos(self.get_repos_by_language(language))
+            for repo in self.get_repos_by_language(language):
+                self._retrieve_or_create_repo(repo)
+
+    def start_sync(self):
+        print("RepoManager started file sync")
+
+        repos = Repo.objects.filter(files__count=0)
+
+        self.sync_repos(repos)
+
+    def _retrieve_or_create_repo(self, repo):
+        repo, created = Repo.objects.get_or_create(
+            full_name=repo["full_name"],
+            default_branch=repo["default_branch"]
+        )
+
+        return repo
 
     def _sync_repo(self, repo, cap=None):
         repo, created = Repo.objects.get_or_create(

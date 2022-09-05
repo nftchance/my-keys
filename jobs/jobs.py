@@ -8,11 +8,15 @@ from django_apscheduler.jobstores import DjangoJobStore
 from django_apscheduler.models import DjangoJobExecution
 from django_apscheduler import util
 
+@util.close_old_connections
+def retrieve_repos():
+    repo_manager = RepoManager()
+    repo_manager.start_retrieval()
 
 @util.close_old_connections
 def sync_repos():
     repo_manager = RepoManager()
-    repo_manager.start()
+    repo_manager.start_sync()
 
 
 @util.close_old_connections
@@ -41,6 +45,16 @@ class JobManager:
     def ready(self, *args, **options):
         scheduler = BackgroundScheduler()
         scheduler.add_jobstore(DjangoJobStore(), "default")
+
+        # Retrieve repos every 12 hours
+        scheduler.add_job(
+            retrieve_repos,
+            CronTrigger(hour="*/12", minute=0, second=0),
+            id="retrieve_repos",
+            name="Retrieve repos every 12 hours",
+            replace_existing=True,
+        )
+        print("Added job 'retrieve_repos'.")
 
         scheduler.add_job(
             sync_repos,

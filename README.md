@@ -6,6 +6,10 @@ This project does not have a detailed README on purpose. If you would like to de
 
 Usage of this tool is highly unethical. However, curiosity killed the cat and I felt even more unethical building this, and not open-sourcing it so here we are.
 
+## Data Warning
+
+A massive amount of data is stored locally. I highly advise not running this on your primary drive or you will run out of space quickly.
+
 ## Running
 
 ```
