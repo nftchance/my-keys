@@ -12,4 +12,4 @@ class RepoFileAdmin(admin.ModelAdmin):
 
 @admin.register(RepoKey)
 class RepoKeyAdmin(admin.ModelAdmin):
-    list_display = ('key',)
+    list_display = ('key', 'is_private_key', 'address', 'balance')

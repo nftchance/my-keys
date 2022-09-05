@@ -1,27 +1,12 @@
 from django.db import models
 
-from keys.keys import KeyManager
-
-KEY_MANAGER = KeyManager()
-
 class RepoKey(models.Model):
-    def save(self, *args, **kwargs):
-        self.is_private_key = KEY_MANAGER.is_private_key(self.key)
-
-        if self.is_private_key:
-            self.address = KEY_MANAGER.get_address(self.key)
-        elif KEY_MANAGER.is_address(self.key):
-            self.address = self.key
-
-        if self.address:
-            self.balance = KEY_MANAGER.get_balance(self.address)
-
-        super(RepoKey, self).save(*args, **kwargs)
-
     key = models.CharField(max_length=200)
     is_private_key = models.BooleanField(default=False)
     address = models.CharField(max_length=200, null=True, blank=True)
     balance = models.CharField(max_length=200, null=True, blank=True)
+
+    synced = models.BooleanField(default=False)
 
     def __str__(self):
         return self.key

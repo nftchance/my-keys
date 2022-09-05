@@ -21,17 +21,8 @@ class RepoManager:
         'javascript',
     ]
 
-    # FILE_NAMES = [
-    #     'hardhat.config.js',
-    #     'truffle-config.js',
-    #     'truffle.js',
-    #     'hardhat.config.ts',
-    #     'truffle-config.ts',
-    #     'truffle.ts',
-    # ]
-
-    # Regex to find any string that is 0x followed by 40 hex characters
-    HEX_KEY_REGEX = r'0x[0-9a-fA-F]{40}'
+    # Regex to find any string that is 0x followed by only 40 hex characters without include anymore
+    HEX_KEY_REGEX = r'0x[a-fA-F0-9]{40}'
 
     def __init__(self):
         self.repo_calls = {}
@@ -41,6 +32,7 @@ class RepoManager:
         print("RepoManager started")
 
         self.sync_repos(self.get_repos_by_tag("hardhat"))
+        # self.sync_repos([self.get_repo_by_name("panacloud-modern-global-apps/defi-dapps-solidity-smart-contracts")])
 
         # for tag in self.TAGS:
         #     self.get_repos_by_tag(tag)
