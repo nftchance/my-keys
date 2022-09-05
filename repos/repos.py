@@ -11,6 +11,8 @@ from repos.models import Repo, RepoFile, RepoKey
 # This is a personal access token
 GITHUB_AUTH_TOKEN = settings.GITHUB_AUTH_TOKEN
 
+# TODO: Now that the foundational processing is in place improve the finding of keys in text files.
+
 class RepoManager:
     TAGS = [
         'solidity',
@@ -22,8 +24,10 @@ class RepoManager:
         'javascript',
     ]
 
-    # Regex to find any string that is 0x followed by only 40 hex characters without include anymore
-    HEX_KEY_REGEX = r'0x[a-fA-F0-9]{40}'
+    # Regex to find ethereum private keys
+    HEX_KEY_REGEX = re.compile(
+        r"[a-fA-F0-9]{64}"
+    )
 
     def __init__(self):
         self.repo_calls = {}
