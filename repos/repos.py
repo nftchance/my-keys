@@ -40,33 +40,40 @@ class RepoManager:
         for language in self.LANGUAGES:
             self.sync_repos(self.get_repos_by_language(language))
 
-    def _sync_repo(self, repo):
+    def _sync_repo(self, repo, cap=None):
         repo, created = Repo.objects.get_or_create(
             full_name=repo["full_name"],
             default_branch=repo["default_branch"]
         )
 
-        files = self.get_files(repo.full_name, repo.default_branch)
-        if repo.last_commit != files[0]["sha"]:
-            repo.last_commit = files[0]["sha"]
+        # Get every commit in the repo
+        commits = [commit['sha'] for commit in self.get_commits(repo.full_name)]
 
-            for file in files:
-                if file["type"] == "blob":
-                    file_content = self.get_file(
-                        repo.full_name, repo.default_branch, file["path"])
-                    keys = self.get_keys_in_file(file_content)
+        if cap:
+            commits = commits[:cap]
 
-                    repo_file, created = RepoFile.objects.get_or_create(
-                        commit=file["sha"],
-                        file_name=file["path"],
-                    )
+        for commit in commits:
+            files = self.get_files(repo.full_name, commit)
+            if RepoFile.objects.filter(commit=commit).exists():
+                repo.last_commit = files[0]["sha"]
 
-                    for key in keys:
-                        repo_key, created = RepoKey.objects.get_or_create(
-                            key=key)
-                        repo_file.keys.add(repo_key)
+                for file in files:
+                    if file["type"] == "blob":
+                        file_content = self.get_file(
+                            repo.full_name, repo.default_branch, file["path"])
+                        keys = self.get_keys_in_file(file_content)
 
-                    repo.files.add(repo_file)
+                        repo_file, created = RepoFile.objects.get_or_create(
+                            commit=file["sha"],
+                            file_name=file["path"],
+                        )
+
+                        for key in keys:
+                            repo_key, created = RepoKey.objects.get_or_create(
+                                key=key)
+                            repo_file.keys.add(repo_key)
+
+                        repo.files.add(repo_file)
 
         return repo
 
@@ -75,7 +82,7 @@ class RepoManager:
             repos = repos[:cap]
 
         for repo in repos:
-            self._sync_repo(repo)
+            self._sync_repo(repo, cap)
 
         return True
 

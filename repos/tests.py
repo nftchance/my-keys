@@ -56,7 +56,8 @@ class RepoManagerTestCase(TestCase):
         self.assertNotEqual(commit, None)
 
     def test_get_all_commits_count(self):
-        commits = self.repo_manager.get_all_commits_count("nftchance/my-keys", "master")
+        commits = self.repo_manager.get_all_commits_count(
+            "nftchance/my-keys", "master")
         self.assertTrue(commits > 0)
 
     def test_get_commits(self):
