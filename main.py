@@ -1,3 +1,10 @@
+import os
+import django
+
+# setup django with the right settings
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "keys.settings")
+django.setup()
+
 from repos.repos import RepoManager
 
 CONFIG = {

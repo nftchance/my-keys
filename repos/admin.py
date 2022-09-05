@@ -8,7 +8,7 @@ class RepoAdmin(admin.ModelAdmin):
 
 @admin.register(RepoFile)
 class RepoFileAdmin(admin.ModelAdmin):
-    list_display = ('commit', 'file_name', 'contents_hash')
+    list_display = ('commit', 'file_name')
 
 @admin.register(RepoKey)
 class RepoKeyAdmin(admin.ModelAdmin):
