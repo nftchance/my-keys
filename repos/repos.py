@@ -11,6 +11,7 @@ from repos.models import Repo, RepoFile, RepoKey
 # This is a personal access token
 GITHUB_AUTH_TOKEN = settings.GITHUB_AUTH_TOKEN
 
+
 class RepoManager:
     TAGS = [
         'solidity',
@@ -47,7 +48,8 @@ class RepoManager:
         )
 
         # Get every commit in the repo
-        commits = [commit['sha'] for commit in self.get_commits(repo.full_name)]
+        commits = [commit['sha']
+                   for commit in self.get_commits(repo.full_name)]
 
         if cap:
             commits = commits[:cap]
@@ -176,12 +178,17 @@ class RepoManager:
         _page = 0
 
         while querying:
-            url = f'https://api.github.com/repos/{full_name}/commits?page={page + _page}&per_page=100';
+            url = f'https://api.github.com/repos/{full_name}/commits?page={page + _page}&per_page=100'
+
+            if url in self.repo_calls:
+                return self.repo_calls[url]
 
             r = self._authorized_get_request(url)
             res = r.json()
 
             commits.append(res)
+
+            self.repo_calls[url] = res
 
             if 'next' in r.links:
                 _page += 1
@@ -190,24 +197,32 @@ class RepoManager:
 
         # convert the above for loop to a one liner
         commits = [c for commit in commits for c in commit]
-        return commits
 
+        return commits
 
     def get_first_commit(self, full_name):
         commits = self.get_commits(full_name)
+
         return commits[len(commits) - 1]["sha"]
 
     def get_all_commits_count(self, full_name, branch=None):
         if not branch:
             branch = self._get_repo(full_name)["default_branch"]
 
-        first_commit = self.get_first_commit(full_name);
+        first_commit = self.get_first_commit(full_name)
 
         url = f'https://api.github.com/repos/{full_name}/compare/{first_commit}...{branch}'
+
+        if url in self.repo_calls:
+            return self.repo_calls[url]
+
         r = self._authorized_get_request(url)
         res = r.json()
 
         commit_count = res['total_commits'] + 1
+
+        self.repo_calls[url] = commit_count
+
         return commit_count
 
     # Get all the files in the repository
