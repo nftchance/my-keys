@@ -31,18 +31,29 @@ class RepoManager:
     HEX_KEY_REGEX = r'0x[0-9a-fA-F]{40}'
 
     def __init__(self):
-        self.repos = []
+        self.repos = {}
         self.repo_count = 0
 
     def start(self):
         print("RepoManager started")
 
+    def _get_repo(self, full_name):
+        if full_name in self.repos: return self.repos[full_name]
 
+        url = f"https://api.github.com/repos/{full_name}"
 
-    # DRY component used to get the content of a repository
-    def _get_repo(self, url):
         r = requests.get(url)
         res = r.json()
+
+        return res
+
+    # DRY component used to get the content of a repository
+    def _get_repos(self, url):
+        r = requests.get(url)
+        res = r.json()
+
+        for item in res["items"]:
+            self.repos[item["full_name"]] = item
 
         return res["items"]
 
@@ -50,17 +61,20 @@ class RepoManager:
     def get_repos_by_tag(self, tag):
         url = f"https://api.github.com/search/repositories?q=topic:{tag}&sort=-stars&order=desc"
 
-        return self._get_repo(url)
+        return self._get_repos(url)
 
     # Search all repos by language
     def get_repos_by_language(self, language):
         url = f"https://api.github.com/search/repositories?q=language:{language}&sort=-stars&order=desc"
 
-        return self._get_repo(url)
+        return self._get_repos(url)
 
     # Get all the files in the repository
-    def get_files(self, full_name):
-        url = f"https://api.github.com/repos/{full_name}/git/trees/master?recursive=1"
+    def get_files(self, full_name, branch=None):
+        if not branch:
+            branch = self._get_repo(full_name)["default_branch"]
+
+        url = f"https://api.github.com/repos/{full_name}/git/trees/{branch}?recursive=1"
 
         r = requests.get(url)
         res = r.json()
@@ -68,7 +82,13 @@ class RepoManager:
         return res["tree"]
 
     # Filter down to only the files that we are looking for
-    def get_filtered_files(self, files):
+    def get_filtered_files(self, files=None, full_name=None):
+        if not files:
+            if not full_name:
+                raise Exception("Must provide either files or full_name")
+
+            files = self.get_files(full_name)
+
         filtered_files = []
 
         for file in files:
