@@ -34,11 +34,10 @@ class KeyManager:
                 time.sleep(600)
 
     def sync_key(self, key):
-        key.is_private_key = self.is_private_key(key.key)
-
         if self.is_address(key.key):
             key.address = self.get_checksum_address(key.key)
-        elif self.is_private_key:
+        elif self.is_private_key(key.key):
+            key.is_private_key = True
             key.address = self.get_address(key.key)
 
         if key.address and key.address != '':
@@ -46,6 +45,10 @@ class KeyManager:
 
         key.synced = True
         key.save()
+
+    def sync_keys(self, keys):
+        for key in keys:
+            self.sync_key(key)
 
     def is_private_key(self, key, type='ETH') -> bool:
         try:

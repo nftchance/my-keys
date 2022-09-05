@@ -48,3 +48,14 @@ class KeyManagerTestCase(TestCase):
         balance = self.key_manager.get_balance(address)
 
         self.assertTrue(balance > 0)
+
+    def test_sync_keys(self):
+        repo_key, created = RepoKey.objects.get_or_create(
+            key="3f6e3d2c2f1c1f0e0d0c0b0a090807060504030201000f0e0d0c0b0a09080706",
+        )
+
+        self.key_manager.sync_key(repo_key)
+
+        repo_key.refresh_from_db()
+
+        self.assertIsNotNone(repo_key.address)
