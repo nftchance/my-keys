@@ -30,7 +30,9 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django_apscheduler",
     "rest_framework",
+    "jobs",
     "repos",
 ]
 
@@ -119,3 +121,19 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 ALCHEMY_KEY = os.environ.get("ALCHEMY_KEY")
 GITHUB_AUTH_TOKEN = os.environ.get("GITHUB_AUTH_TOKEN")
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        'app_api': {
+            'handlers': ['console'],
+            'level': 'INFO',
+        },
+    },
+}
