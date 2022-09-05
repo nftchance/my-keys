@@ -44,7 +44,7 @@ class KeyManager:
         try:
             self.get_address(key, type)
             return True
-        except:
+        except Exception as e:
             return False
 
     def is_address(self, address, type='ETH') -> bool:
@@ -54,7 +54,7 @@ class KeyManager:
         return self.TYPES[type].toChecksumAddress(address)
 
     def get_address(self, key, type='ETH') -> str:
-        return self.to_checksum_address(self.TYPES[type].eth.account.privateKeyToAccount(key).address)
+        return self.get_checksum_address(self.TYPES[type].eth.account.privateKeyToAccount(key).address)
 
     def get_balance(self, key, type='ETH') -> str:
         return self.TYPES[type].eth.getBalance(key)
