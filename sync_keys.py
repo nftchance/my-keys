@@ -12,4 +12,8 @@ def run():
     key_manager.start()
 
 # Run the primary process
-run()
+def main():
+    run()
+
+if __name__ == '__main__':
+    main()

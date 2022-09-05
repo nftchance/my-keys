@@ -87,8 +87,6 @@ class RepoManager:
         return r
 
     def _get_repo(self, full_name):
-        print("Getting repo %s" % (full_name))
-
         if full_name in self.repos:
             return self.repos[full_name]
 
