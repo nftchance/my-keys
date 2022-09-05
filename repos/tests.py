@@ -7,11 +7,15 @@ class RepoManagerTestCase(TestCase):
         self.repo_manager = RepoManager()
 
     def test_get_repos_by_tag(self):
-        repos = self.repo_manager.get_repos_by_tag("hardhat")
+        repos = self.repo_manager.get_repos_by_tag("hardhat", 1)
         self.assertTrue(len(repos) > 0)
 
     def test_get_repos_by_language(self):
-        repos = self.repo_manager.get_repos_by_language("solidity")
+        repos = self.repo_manager.get_repos_by_language("solidity", 1)
+        self.assertTrue(len(repos) > 0)
+
+    def test_get_repos_by_tag_multiple_pages(self):
+        repos = self.repo_manager.get_repos_by_tag("hardhat", 2)
         self.assertTrue(len(repos) > 0)
 
     def test_get_repo_by_name(self):

@@ -16,7 +16,8 @@ class KeyManager:
     }
 
     def __init__(self) -> None:
-        self.TYPES['ETH'] = Web3(Web3.HTTPProvider(f'https://eth-mainnet.alchemyapi.io/v2/{settings.ALCHEMY_KEY}'))
+        self.TYPES['ETH'] = Web3(Web3.HTTPProvider(
+            f'https://eth-mainnet.alchemyapi.io/v2/{settings.ALCHEMY_KEY}'))
 
     def start(self):
         print("KeyManager started")
@@ -24,7 +25,7 @@ class KeyManager:
         keys = RepoKey.objects.filter(synced=False)
         for key in keys:
             self.sync_key(key)
-
+        
     def sync_key(self, key):
         key.is_private_key = self.is_private_key(key.key)
 

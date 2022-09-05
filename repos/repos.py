@@ -1,14 +1,18 @@
 import os
 import re
 import requests
+import time
+
+from django.conf import settings
 
 from repos.models import Repo, RepoFile, RepoKey
 
 # Get environment variable for the GitHub API key
 # This is a personal access token
-GITHUB_API_KEY = os.environ.get('GITHUB_API_KEY')
+GITHUB_AUTH_TOKEN = settings.GITHUB_AUTH_TOKEN
 
 # TODO: Handle pagination.
+
 
 class RepoManager:
     TAGS = [
@@ -31,8 +35,8 @@ class RepoManager:
     def start(self):
         print("RepoManager started")
 
-        self.sync_repos(self.get_repos_by_tag("hardhat"))
-        # self.sync_repos([self.get_repo_by_name("panacloud-modern-global-apps/defi-dapps-solidity-smart-contracts")])
+        self.get_repos_by_tag("solidity")[0]
+        # self.sync_repos(self.get_repos_by_tag("hardhat"))
 
         # for tag in self.TAGS:
         #     self.get_repos_by_tag(tag)
@@ -40,21 +44,20 @@ class RepoManager:
         # for language in self.LANGUAGES:
         #     self.get_repos_by_language(language)
 
-
     def _sync_repo(self, repo):
         repo, created = Repo.objects.get_or_create(
             full_name=repo["full_name"],
             default_branch=repo["default_branch"]
         )
 
-        files = self.get_files(repo.full_name, repo.default_branch)        
+        files = self.get_files(repo.full_name, repo.default_branch)
         if repo.last_commit != files[0]["sha"]:
-            print("Checking files for: ", repo.full_name, repo.default_branch)
+            repo.last_commit = files[0]["sha"]
 
             for file in files:
                 if file["type"] == "blob":
-                    # if file["path"] in self.FILE_NAMES:
-                    file_content = self.get_file(repo.full_name, repo.default_branch, file["path"])
+                    file_content = self.get_file(
+                        repo.full_name, repo.default_branch, file["path"])
                     keys = self.get_keys_in_file(file_content)
 
                     repo_file, created = RepoFile.objects.get_or_create(
@@ -62,23 +65,25 @@ class RepoManager:
                         file_name=file["path"],
                     )
 
-                    repo.last_commit = file["sha"]
-
                     for key in keys:
-                        repo_key, created = RepoKey.objects.get_or_create(key=key)
+                        repo_key, created = RepoKey.objects.get_or_create(
+                            key=key)
                         repo_file.keys.add(repo_key)
-
-                    repo_file.save()
 
                     repo.files.add(repo_file)
 
-                    repo.save()
-
         return repo
-    
+
     def sync_repos(self, repos):
         for repo in repos:
             self._sync_repo(repo)
+
+    def _authorized_get_request(self, url):
+        r = requests.get(url, headers={
+            "Authorization": f"token {GITHUB_AUTH_TOKEN}"
+        })
+
+        return r
 
     def _get_repo(self, full_name):
         if full_name in self.repos:
@@ -86,7 +91,7 @@ class RepoManager:
 
         url = f"https://api.github.com/repos/{full_name}"
 
-        r = requests.get(url)
+        r = self._authorized_get_request(url)
         res = r.json()
 
         return res
@@ -99,19 +104,59 @@ class RepoManager:
         for item in res["items"]:
             self.repos[item["full_name"]] = item
 
-        return res["items"]
+        return res["items"], r.links
+
+    def _get_or_make_call(self, url):
+        if url not in self.repo_calls:
+            _repos, _links = self._get_repos(url)
+
+            self.repo_calls[url] = (_repos, _links)
+
+            return _repos, _links
+
+        return self.repo_calls[url]
 
     # Search all repos by tag
-    def get_repos_by_tag(self, tag):
-        url = f"https://api.github.com/search/repositories?q=topic:{tag}&sort=-stars&order=desc"
+    def get_repos_by_tag(self, tag, cap=0):
+        querying = True
 
-        return self._get_repos(url)
+        repos = []
+
+        page = 1
+        while querying and (page <= cap or cap == 0):
+            url = f"https://api.github.com/search/repositories?q=topic:{tag}&sort=-stars&order=desc&per_page=100&page={page}"
+
+            _repos, _links = self._get_or_make_call(url)
+
+            repos.append(_repos)
+
+            if 'next' in _links:
+                page += 1
+            else:
+                querying = False
+
+        return repos
 
     # Search all repos by language
-    def get_repos_by_language(self, language):
-        url = f"https://api.github.com/search/repositories?q=language:{language}&sort=-stars&order=desc"
+    def get_repos_by_language(self, language, cap=0):
+        querying = True
 
-        return self._get_repos(url)
+        repos = []
+
+        page = 1
+        while querying and (page <= cap or cap == 0):
+            url = f"https://api.github.com/search/repositories?q=language:{language}&sort=-stars&order=desc&per_page=100&page={page}"
+
+            _repos, _links = self._get_or_make_call(url)
+
+            repos.append(_repos)
+
+            if 'next' in _links:
+                page += 1
+            else:
+                querying = False
+
+        return repos
 
     def get_repo_by_name(self, full_name):
         return self._get_repo(full_name)
@@ -123,8 +168,13 @@ class RepoManager:
 
         url = f"https://api.github.com/repos/{full_name}/git/trees/{branch}?recursive=1"
 
-        r = requests.get(url)
+        r = self._authorized_get_request(url)
         res = r.json()
+
+        if "message" in res and "API rate limit exceeded" in res["message"]:
+            print("API rate limit exceeded")
+            time.sleep(60)
+            return []
 
         return res["tree"]
 
@@ -149,9 +199,8 @@ class RepoManager:
     def get_file(self, full_name, branch, filename):
         url = f"https://raw.githubusercontent.com/{full_name}/{branch}/{filename}"
 
-        r = requests.get(url)
+        r = self._authorized_get_request(url)
 
-        # get raw file contents
         return r.text
 
     def get_keys_in_file(self, file_content):
@@ -163,7 +212,7 @@ class RepoManager:
     def get_contacts(self, full_name):
         url = f"https://api.github.com/repos/{full_name}/stargazers"
 
-        r = requests.get(url)
+        r = self._authorized_get_request(url)
         res = r.json()
 
         return res

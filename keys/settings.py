@@ -118,3 +118,4 @@ STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 ALCHEMY_KEY = os.environ.get("ALCHEMY_KEY")
+GITHUB_AUTH_TOKEN = os.environ.get("GITHUB_AUTH_TOKEN")
