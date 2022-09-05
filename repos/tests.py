@@ -73,3 +73,11 @@ class RepoManagerTestCase(TestCase):
             "nftchance/my-keys", commit)
 
         self.assertTrue(len(files) > 0)
+
+    def test_sync_repos(self):
+        repos = self.repo_manager.get_repos_by_tag("hardhat", 1)
+        self.assertTrue(len(repos) > 0)
+
+        synced = self.repo_manager.sync_repos(repos, 1)
+
+        self.assertTrue(synced)

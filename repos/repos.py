@@ -11,8 +11,6 @@ from repos.models import Repo, RepoFile, RepoKey
 # This is a personal access token
 GITHUB_AUTH_TOKEN = settings.GITHUB_AUTH_TOKEN
 
-# TODO: Now that the foundational processing is in place improve the finding of keys in text files.
-
 class RepoManager:
     TAGS = [
         'solidity',
@@ -35,9 +33,6 @@ class RepoManager:
 
     def start(self):
         print("RepoManager started")
-
-        # self.get_repos_by_tag("solidity")
-        self.sync_repos(self.get_repos_by_tag("hardhat"))
 
         for tag in self.TAGS:
             self.sync_repos(self.get_repos_by_tag(tag))
@@ -75,9 +70,14 @@ class RepoManager:
 
         return repo
 
-    def sync_repos(self, repos):
+    def sync_repos(self, repos, cap=None):
+        if cap:
+            repos = repos[:cap]
+
         for repo in repos:
             self._sync_repo(repo)
+
+        return True
 
     def _authorized_get_request(self, url):
         r = requests.get(url, headers={
