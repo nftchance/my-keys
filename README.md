@@ -17,3 +17,10 @@ python manage.py runserver
 python sync_repos.py
 python sync_keys.py
 ```
+
+## Targets
+
+- [x] GitHub repos
+- [ ] (Generalized) repository framework
+- [ ] Twitch
+- [ ] YouTube Live Streams
