@@ -42,45 +42,48 @@ class RepoManager:
         # self.get_files("grumbach/ft_ping")
         # self.get_file("grumbach/ft_ping", "master", "srcs/gen_ip_header.c")
 
+    # DRY component used to get the content of a repository
     def _get_repo(self, url):
         r = requests.get(url)
         res = r.json()
 
-        for item in res["items"]:
-            print(item["default_branch"])
-            print(item["full_name"])
-
         return res["items"]
 
+    # Search all repos by tag
     def get_repos_by_tag(self, tag):
         url = f"https://api.github.com/search/repositories?q=topic:{tag}&sort=-stars&order=desc"
 
-        print('Getting repos tagged as: ' + tag)
-
         return self._get_repo(url)
 
+    # Search all repos by language
     def get_repos_by_language(self, language):
         url = f"https://api.github.com/search/repositories?q=language:{language}&sort=-stars&order=desc"
 
-        print('Getting repos tagged as: ' + language)
-
         return self._get_repo(url)
 
+    # Get all the files in the repository
     def get_files(self, full_name):
         url = f"https://api.github.com/repos/{full_name}/git/trees/master?recursive=1"
-
-        print('Getting content of repo: http://github.com/' + full_name)
 
         r = requests.get(url)
         res = r.json()
 
         return res["tree"]
 
+    # Filter down to only the files that we are looking for
+    def get_filtered_files(self, files):
+        filtered_files = []
+
+        for file in files:
+            if file["type"] == "blob":
+                if file["path"] in self.FILE_NAMES:
+                    filtered_files.append(file)
+
+        return filtered_files
+
     # get the raw file contents from github content
     def get_file(self, full_name, branch, filename):
         url = f"https://raw.githubusercontent.com/{full_name}/{branch}/{filename}"
-
-        print('Getting content of file: ' + filename)
 
         r = requests.get(url)
 
@@ -96,13 +99,7 @@ class RepoManager:
     def get_contacts(self, full_name):
         url = f"https://api.github.com/repos/{full_name}/stargazers"
 
-        print('Getting contacts of repo: ' + full_name)
-
         r = requests.get(url)
         res = r.json()
 
-        for contact in res:
-            print(contact["login"])
-            print(contact["html_url"])
-            print(contact["organizations_url"])
-            print(contact["site_admin"])
+        return res
