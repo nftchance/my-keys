@@ -1,0 +1,81 @@
+[
+    {
+        "sha": "f209d6c9fa1e6f6e384973ace33659dc60dcf277",
+        "node_id": "C_kwDOH8Ap0doAKGYyMDlkNmM5ZmExZTZmNmUzODQ5NzNhY2UzMzY1OWRjNjBkY2YyNzc",
+        "commit": {
+            "author": {
+                "name": "nftchance",
+                "email": "chance@utc24.io",
+                "date": "2022-09-05T18: 06: 06Z"
+            },
+            "committer": {
+                "name": "nftchance",
+                "email": "chance@utc24.io",
+                "date": "2022-09-05T18: 06: 06Z"
+            },
+            "message": "key resolution tests",
+            "tree": {
+                "sha": "871abcf1c8c26e38d7fd6dcc9a1e5d028b194cba",
+                "url": "https: //api.github.com/repos/nftchance/my-keys/git/trees/871abcf1c8c26e38d7fd6dcc9a1e5d028b194cba"
+            },
+            "url": "https://api.github.com/repos/nftchance/my-keys/git/commits/f209d6c9fa1e6f6e384973ace33659dc60dcf277",
+            "comment_count": 0,
+            "verification": {
+                "verified": false,
+                "reason": "unsigned",
+                "signature": null,
+                "payload": null
+            }
+        },
+        "url": "https://api.github.com/repos/nftchance/my-keys/commits/f209d6c9fa1e6f6e384973ace33659dc60dcf277",
+        "html_url": "https://github.com/nftchance/my-keys/commit/f209d6c9fa1e6f6e384973ace33659dc60dcf277",
+        "comments_url": "https://api.github.com/repos/nftchance/my-keys/commits/f209d6c9fa1e6f6e384973ace33659dc60dcf277/comments",
+        "author": {
+            "login": "nftchance",
+            "id": 22061495,
+            "node_id": "MDQ6VXNlcjIyMDYxNDk1",
+            "avatar_url": "https://avatars.githubusercontent.com/u/22061495?v=4",
+            "gravatar_id": "",
+            "url": "https: //api.github.com/users/nftchance",
+            "html_url": "https://github.com/nftchance",
+            "followers_url": "https://api.github.com/users/nftchance/followers",
+            "following_url": "https://api.github.com/users/nftchance/following{/other_user}",
+            "gists_url": "https://api.github.com/users/nftchance/gists{/gist_id}",
+            "starred_url": "https://api.github.com/users/nftchance/starred{/owner}{/repo}",
+            "subscriptions_url": "https://api.github.com/users/nftchance/subscriptions",
+            "organizations_url": "https://api.github.com/users/nftchance/orgs",
+            "repos_url": "https://api.github.com/users/nftchance/repos",
+            "events_url": "https://api.github.com/users/nftchance/events{/privacy}",
+            "received_events_url": "https://api.github.com/users/nftchance/received_events",
+            "type": "User",
+            "site_admin": false
+        },
+        "committer": {
+            "login": "nftchance",
+            "id": 22061495,
+            "node_id": "MDQ6VXNlcjIyMDYxNDk1",
+            "avatar_url": "https://avatars.githubusercontent.com/u/22061495?v=4",
+            "gravatar_id": "",
+            "url": "https: //api.github.com/users/nftchance",
+            "html_url": "https://github.com/nftchance",
+            "followers_url": "https://api.github.com/users/nftchance/followers",
+            "following_url": "https://api.github.com/users/nftchance/following{/other_user}",
+            "gists_url": "https://api.github.com/users/nftchance/gists{/gist_id}",
+            "starred_url": "https://api.github.com/users/nftchance/starred{/owner}{/repo}",
+            "subscriptions_url": "https://api.github.com/users/nftchance/subscriptions",
+            "organizations_url": "https://api.github.com/users/nftchance/orgs",
+            "repos_url": "https://api.github.com/users/nftchance/repos",
+            "events_url": "https://api.github.com/users/nftchance/events{/privacy}",
+            "received_events_url": "https://api.github.com/users/nftchance/received_events",
+            "type": "User",
+            "site_admin": false
+        },
+        "parents": [
+            {
+                "sha": "22fd6ab8d9c5e3cccd06517cbb4f1660cd8ea846",
+                "url": "https://api.github.com/repos/nftchance/my-keys/commits/22fd6ab8d9c5e3cccd06517cbb4f1660cd8ea846",
+                "html_url": "https://github.com/nftchance/my-keys/commit/22fd6ab8d9c5e3cccd06517cbb4f1660cd8ea846"
+            }
+        ]
+    }
+]
