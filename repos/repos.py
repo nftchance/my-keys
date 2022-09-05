@@ -37,10 +37,7 @@ class RepoManager:
     def start(self):
         print("RepoManager started")
 
-        # self.get_repos_by_tag('hardhat')
-        # self.get_repos_by_language('solidity')
-        # self.get_files("grumbach/ft_ping")
-        # self.get_file("grumbach/ft_ping", "master", "srcs/gen_ip_header.c")
+
 
     # DRY component used to get the content of a repository
     def _get_repo(self, url):
