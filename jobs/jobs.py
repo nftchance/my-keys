@@ -1,15 +1,12 @@
 # runapscheduler.py
 from repos.repos import RepoManager
 from keys.keys import KeyManager
-import logging
 
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
 from django_apscheduler.jobstores import DjangoJobStore
 from django_apscheduler.models import DjangoJobExecution
 from django_apscheduler import util
-
-logger = logging.getLogger(__name__)
 
 
 @util.close_old_connections
@@ -47,19 +44,19 @@ class JobManager:
 
         scheduler.add_job(
             sync_repos,
-            trigger=CronTrigger(second="*/30"),  # Every 6000 seconds
+            trigger=CronTrigger(hour="1"),  # Every 6000 seconds
             id="sync_repos",  # The `id` assigned to each job MUST be unique
             max_instances=1,
-            replace_existing=False,
+            replace_existing=True,
         )
         print("Added job 'sync_repos'.")
 
         scheduler.add_job(
             sync_keys,
-            trigger=CronTrigger(second="*/30"),  # Every 60 seconds
+            trigger=CronTrigger(minute="10"),  # Every 60 seconds
             id="sync_keys",  # The `id` assigned to each job MUST be unique
             max_instances=1,
-            replace_existing=False,
+            replace_existing=True,
         )
         print("Added job 'sync_keys'.")
 
