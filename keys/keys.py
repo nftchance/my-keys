@@ -3,8 +3,6 @@ Key Manager is a class that takes a supplied key and determines if it is a
 valid private key for a cryptocurrency wallet.
 """
 
-import os
-
 from django.conf import settings
 
 from web3 import Web3
@@ -21,30 +19,22 @@ class KeyManager:
         self.TYPES['ETH'] = Web3(Web3.HTTPProvider(f'https://eth-mainnet.alchemyapi.io/v2/{settings.ALCHEMY_KEY}'))
 
     def start(self):
+        print("KeyManager started")
+
         keys = RepoKey.objects.filter(synced=False)
         for key in keys:
             self.sync_key(key)
 
     def sync_key(self, key):
-        print("PROCESSING", key)
-
         key.is_private_key = self.is_private_key(key.key)
-
-        print("IS PRIVATE KEY", key.is_private_key)
 
         if self.is_address(key.key):
             key.address = self.get_checksum_address(key.key)
         elif self.is_private_key:
             key.address = self.get_address(key.key)
-        else:
-            print("Invalid key: ", key.key)
-
-        print('ADDRESS', key.address)
 
         if key.address and key.address != '':
             key.balance = self.get_balance(key.address)
-
-        print('BALANCE', key.balance)
 
         key.synced = True
         key.save()

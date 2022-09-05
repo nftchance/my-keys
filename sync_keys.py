@@ -1,5 +1,5 @@
-import os
 import django
+import os
 
 # setup django with the right settings
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "keys.settings")
