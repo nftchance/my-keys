@@ -11,9 +11,6 @@ from repos.models import Repo, RepoFile, RepoKey
 # This is a personal access token
 GITHUB_AUTH_TOKEN = settings.GITHUB_AUTH_TOKEN
 
-# TODO: Handle pagination.
-
-
 class RepoManager:
     TAGS = [
         'solidity',
@@ -38,11 +35,11 @@ class RepoManager:
         # self.get_repos_by_tag("solidity")
         self.sync_repos(self.get_repos_by_tag("hardhat"))
 
-        # for tag in self.TAGS:
-        #     self.get_repos_by_tag(tag)
+        for tag in self.TAGS:
+            self.sync_repos(self.get_repos_by_tag(tag))
 
-        # for language in self.LANGUAGES:
-        #     self.get_repos_by_language(language)
+        for language in self.LANGUAGES:
+            self.sync_repos(self.get_repos_by_language(language))
 
     def _sync_repo(self, repo):
         repo, created = Repo.objects.get_or_create(
