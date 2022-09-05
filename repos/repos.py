@@ -32,7 +32,6 @@ class RepoManager:
 
     def __init__(self):
         self.repos = {}
-        self.repo_count = 0
 
     def start(self):
         print("RepoManager started")
@@ -68,6 +67,9 @@ class RepoManager:
         url = f"https://api.github.com/search/repositories?q=language:{language}&sort=-stars&order=desc"
 
         return self._get_repos(url)
+
+    def get_repo_by_name(self, full_name):
+        return self._get_repo(full_name)
 
     # Get all the files in the repository
     def get_files(self, full_name, branch=None):
