@@ -35,8 +35,8 @@ class RepoManager:
     def start(self):
         print("RepoManager started")
 
-        self.get_repos_by_tag("solidity")[0]
-        # self.sync_repos(self.get_repos_by_tag("hardhat"))
+        # self.get_repos_by_tag("solidity")
+        self.sync_repos(self.get_repos_by_tag("hardhat"))
 
         # for tag in self.TAGS:
         #     self.get_repos_by_tag(tag)
@@ -98,7 +98,7 @@ class RepoManager:
 
     # DRY component used to get the content of a repository
     def _get_repos(self, url):
-        r = requests.get(url)
+        r = self._authorized_get_request(url)
         res = r.json()
 
         for item in res["items"]:
@@ -116,17 +116,18 @@ class RepoManager:
 
         return self.repo_calls[url]
 
-    # Search all repos by tag
-    def get_repos_by_tag(self, tag, cap=0):
+    def get_repos_by_url(self, url, cap, arg1, arg2):
         querying = True
 
         repos = []
 
-        page = 1
+        page = 0
         while querying and (page <= cap or cap == 0):
-            url = f"https://api.github.com/search/repositories?q=topic:{tag}&sort=-stars&order=desc&per_page=100&page={page}"
+            _url = url % (arg1, arg2 + page)
 
-            _repos, _links = self._get_or_make_call(url)
+            print(_url)
+
+            _repos, _links = self._get_or_make_call(_url)
 
             repos.append(_repos)
 
@@ -136,27 +137,24 @@ class RepoManager:
                 querying = False
 
         return repos
+
+    # Search all repos by tag
+    def get_repos_by_tag(self, tag, cap=0):
+        return self.get_repos_by_url(
+            "https://api.github.com/search/repositories?q=topic:%s&sort=-stars&order=desc&per_page=100&page=%s",
+            cap,
+            tag,
+            1
+        )
 
     # Search all repos by language
     def get_repos_by_language(self, language, cap=0):
-        querying = True
-
-        repos = []
-
-        page = 1
-        while querying and (page <= cap or cap == 0):
-            url = f"https://api.github.com/search/repositories?q=language:{language}&sort=-stars&order=desc&per_page=100&page={page}"
-
-            _repos, _links = self._get_or_make_call(url)
-
-            repos.append(_repos)
-
-            if 'next' in _links:
-                page += 1
-            else:
-                querying = False
-
-        return repos
+        return self.get_repos_by_url(
+            "https://api.github.com/search/repositories?q=language:%s&sort=-stars&order=desc&per_page=100&page=%s",
+            cap,
+            language,
+            1
+        )
 
     def get_repo_by_name(self, full_name):
         return self._get_repo(full_name)
