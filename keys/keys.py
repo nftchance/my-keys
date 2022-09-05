@@ -3,6 +3,8 @@ Key Manager is a class that takes a supplied key and determines if it is a
 valid private key for a cryptocurrency wallet.
 """
 
+import time
+
 from django.conf import settings
 
 from web3 import Web3
@@ -22,10 +24,15 @@ class KeyManager:
     def start(self):
         print("KeyManager started")
 
-        keys = RepoKey.objects.filter(synced=False)
-        for key in keys:
-            self.sync_key(key)
-        
+        while True:
+            keys = RepoKey.objects.filter(synced=False)
+
+            if keys.exists():
+                for key in keys:
+                    self.sync_key(key)
+            else:
+                time.sleep(600)
+
     def sync_key(self, key):
         key.is_private_key = self.is_private_key(key.key)
 

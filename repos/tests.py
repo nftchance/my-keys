@@ -49,3 +49,12 @@ class RepoManagerTestCase(TestCase):
 
         keys = self.repo_manager.get_keys_in_file(file_content)
         self.assertTrue(len(keys) != 0)
+
+    def test_get_first_commit(self):
+        commit = self.repo_manager.get_first_commit(
+            "nftchance/my-keys")
+        self.assertNotEqual(commit, None)
+
+    def test_get_all_commits_count(self):
+        commits = self.repo_manager.get_all_commits_count("nftchance/my-keys", "master")
+        self.assertTrue(commits > 0)

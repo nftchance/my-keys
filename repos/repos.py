@@ -158,6 +158,34 @@ class RepoManager:
     def get_repo_by_name(self, full_name):
         return self._get_repo(full_name)
 
+    def get_first_commit(self, full_name):
+        url = f'https://api.github.com/repos/{full_name}/commits';
+
+        r = self._authorized_get_request(url)
+        res = r.json()
+
+        if r.links and 'last' in r.links:
+            last_page = int(r.links['last']['url'].split('page=')[1])
+
+            r = self._authorized_get_request(
+                f'https://api.github.com/repos/{full_name}/commits?page={last_page}')
+            res = r.json()
+
+        return res[len(res) - 1]["sha"]
+
+    def get_all_commits_count(self, full_name, branch=None):
+        if not branch:
+            branch = self._get_repo(full_name)["default_branch"]
+
+        first_commit = self.get_first_commit(full_name);
+
+        url = f'https://api.github.com/repos/{full_name}/compare/{first_commit}...{branch}'
+        r = self._authorized_get_request(url)
+        res = r.json()
+
+        commit_count = res['total_commits'] + 1
+        return commit_count
+
     # Get all the files in the repository
     def get_files(self, full_name, branch=None):
         if not branch:
