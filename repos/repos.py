@@ -86,6 +86,8 @@ class RepoManager:
         return r
 
     def _get_repo(self, full_name):
+        print("Getting repo %s" % (full_name))
+
         if full_name in self.repos:
             return self.repos[full_name]
 
@@ -125,8 +127,6 @@ class RepoManager:
         while querying and (page <= cap or cap == 0):
             _url = url % (arg1, arg2 + page)
 
-            print(_url)
-
             _repos, _links = self._get_or_make_call(_url)
 
             repos.append(_repos)
@@ -136,7 +136,7 @@ class RepoManager:
             else:
                 querying = False
 
-        return repos
+        return [_repo for _repo in _repos for repo in repos]
 
     # Search all repos by tag
     def get_repos_by_tag(self, tag, cap=0):
