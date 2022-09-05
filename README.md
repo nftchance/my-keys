@@ -1,5 +1,7 @@
 # My Keys
 
+> **Disclaimer of Liability.** Nothing in this Agreement is to be construed as either an admission of liability or admission of wrongdoing on the part of either party, each of which denies any liabilities or wrongdoing on its part.
+
 This project does not have a detailed README on purpose. If you would like to determine what is going on here I would recommend reading the code.
 
 Usage of this tool is highly unethical. However, curiosity killed the cat and I felt even more unethical building this, and not open-sourcing it so here we are.
