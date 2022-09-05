@@ -158,20 +158,37 @@ class RepoManager:
     def get_repo_by_name(self, full_name):
         return self._get_repo(full_name)
 
-    def get_first_commit(self, full_name):
-        url = f'https://api.github.com/repos/{full_name}/commits';
+    def get_commits(self, full_name, branch=None, page=1):
+        if not branch:
+            branch = self.get_repo_by_name(full_name)["default_branch"]
 
-        r = self._authorized_get_request(url)
-        res = r.json()
+        querying = True
 
-        if r.links and 'last' in r.links:
-            last_page = int(r.links['last']['url'].split('page=')[1])
+        commits = []
 
-            r = self._authorized_get_request(
-                f'https://api.github.com/repos/{full_name}/commits?page={last_page}')
+        _page = 0
+
+        while querying:
+            url = f'https://api.github.com/repos/{full_name}/commits?page={page + _page}&per_page=100';
+
+            r = self._authorized_get_request(url)
             res = r.json()
 
-        return res[len(res) - 1]["sha"]
+            commits.append(res)
+
+            if 'next' in r.links:
+                _page += 1
+            else:
+                querying = False
+
+        # convert the above for loop to a one liner
+        commits = [c for commit in commits for c in commit]
+        return commits
+
+
+    def get_first_commit(self, full_name):
+        commits = self.get_commits(full_name)
+        return commits[len(commits) - 1]["sha"]
 
     def get_all_commits_count(self, full_name, branch=None):
         if not branch:
