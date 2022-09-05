@@ -64,3 +64,12 @@ class RepoManagerTestCase(TestCase):
             "nftchance/my-keys", "master")
 
         self.assertTrue(len(commits) > 0)
+
+    def test_get_files_with_commit(self):
+        commit = self.repo_manager.get_first_commit(
+            "nftchance/my-keys")
+
+        files = self.repo_manager.get_files(
+            "nftchance/my-keys", commit)
+
+        self.assertTrue(len(files) > 0)

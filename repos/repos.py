@@ -204,11 +204,12 @@ class RepoManager:
         return commit_count
 
     # Get all the files in the repository
-    def get_files(self, full_name, branch=None):
-        if not branch:
-            branch = self._get_repo(full_name)["default_branch"]
+    # `sha` can be commit hash or branch name
+    def get_files(self, full_name, sha=None):
+        if not sha:
+            sha = self._get_repo(full_name)["default_branch"]
 
-        url = f"https://api.github.com/repos/{full_name}/git/trees/{branch}?recursive=1"
+        url = f"https://api.github.com/repos/{full_name}/git/trees/{sha}?recursive=1"
 
         r = self._authorized_get_request(url)
         res = r.json()
@@ -238,8 +239,9 @@ class RepoManager:
         return filtered_files
 
     # get the raw file contents from github content
-    def get_file(self, full_name, branch, filename):
-        url = f"https://raw.githubusercontent.com/{full_name}/{branch}/{filename}"
+    # `sha` can be commit hash or name of branch
+    def get_file(self, full_name, sha, filename):
+        url = f"https://raw.githubusercontent.com/{full_name}/{sha}/{filename}"
 
         r = self._authorized_get_request(url)
 
