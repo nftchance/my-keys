@@ -23,6 +23,18 @@ class RepoManager:
         'javascript',
     ]
 
+    BLOCKED_PATHS = [
+        "node_modules",
+        "package-lock.json",
+        "package.json",
+        "yarn.lock",
+        "yarn-error.log",
+        "yarn.lock",
+        "yarn-error.log",
+        "venv",
+        ".pyc"
+    ]
+
     # Regex to find ethereum private keys
     HEX_KEY_REGEX = re.compile(
         r"[a-fA-F0-9]{64}"
@@ -61,21 +73,23 @@ class RepoManager:
 
                 for file in files:
                     if file["type"] == "blob":
-                        file_content = self.get_file(
-                            repo.full_name, repo.default_branch, file["path"])
-                        keys = self.get_keys_in_file(file_content)
+                        # make sure that this file is not a dependency file
+                        if all([blocked_path not in file["path"] for blocked_path in settings.BLOCKED_PATHS]):
+                            file_content = self.get_file(
+                                repo.full_name, repo.default_branch, file["path"])
+                            keys = self.get_keys_in_file(file_content)
 
-                        repo_file, created = RepoFile.objects.get_or_create(
-                            commit=file["sha"],
-                            file_name=file["path"],
-                        )
+                            repo_file, created = RepoFile.objects.get_or_create(
+                                commit=file["sha"],
+                                file_name=file["path"],
+                            )
 
-                        for key in keys:
-                            repo_key, created = RepoKey.objects.get_or_create(
-                                key=key)
-                            repo_file.keys.add(repo_key)
+                            for key in keys:
+                                repo_key, created = RepoKey.objects.get_or_create(
+                                    key=key)
+                                repo_file.keys.add(repo_key)
 
-                        repo.files.add(repo_file)
+                            repo.files.add(repo_file)
 
         return repo
 
