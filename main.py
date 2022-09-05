@@ -1,7 +1,13 @@
-def run():
-    print("Hello World")
+from repos.repos import RepoManager
 
-    # decode target items
+CONFIG = {
+    'REPOS': True,
+    'TWITCH': False,
+}
+
+def run():
+    repo_manager = RepoManager()
+    repo_manager.start()
 
 # Run the primary process
 def main():
