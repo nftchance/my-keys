@@ -9,6 +9,7 @@ Usage of this tool is highly unethical. However, curiosity killed the cat and I 
 ## Running
 
 ```
+setup .env to mirror example.env
 python -m venv venv
 venv\Scripts\Activate.ps1
 pip install -r requirements.txt
