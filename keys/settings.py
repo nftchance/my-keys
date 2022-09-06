@@ -115,7 +115,6 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 
-
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
@@ -126,19 +125,3 @@ GITHUB_AUTH_TOKEN = os.environ.get("GITHUB_AUTH_TOKEN")
 
 TWITCH_CLIENT_ID = os.environ.get("TWITCH_CLIENT_ID")
 TWITCH_SECRET = os.environ.get("TWITCH_SECRET")
-
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'handlers': {
-        'console': {
-            'class': 'logging.StreamHandler',
-        },
-    },
-    'loggers': {
-        'app_api': {
-            'handlers': ['console'],
-            'level': 'INFO',
-        },
-    },
-}
