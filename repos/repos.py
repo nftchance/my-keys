@@ -71,6 +71,9 @@ class RepoManager:
             default_branch=repo["default_branch"]
         )
 
+        if created:
+            print('Created repo', repo.full_name)
+
         return repo
 
     def _sync_repo(self, repo, cap=None):
