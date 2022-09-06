@@ -1,4 +1,3 @@
-import os
 import re
 import requests
 import time
@@ -62,7 +61,7 @@ class RepoManager:
     def start_sync(self):
         print("RepoManager started file sync")
 
-        repos = Repo.objects.filter(files__count=0)
+        repos = Repo.objects.filter(files__isnull=True)
 
         self.sync_repos(repos)
 
@@ -75,10 +74,11 @@ class RepoManager:
         return repo
 
     def _sync_repo(self, repo, cap=None):
-        repo, created = Repo.objects.get_or_create(
-            full_name=repo["full_name"],
-            default_branch=repo["default_branch"]
-        )
+        if not isinstance(repo, Repo):
+            repo, created = Repo.objects.get_or_create(
+                full_name=repo['full_name'],
+                default_branch=repo['default_branch']
+            )
 
         # Get every commit in the repo
         commits = [commit['sha']
@@ -178,13 +178,13 @@ class RepoManager:
                 page += 1
             else:
                 querying = False
-
-        return [_repo for _repo in _repos for repo in repos]
+        
+        return [r for repo in repos for r in repo]
 
     # Search all repos by tag
     def get_repos_by_tag(self, tag, cap=0):
         return self.get_repos_by_url(
-            "https://api.github.com/search/repositories?q=topic:%s&sort=-stars&order=desc&per_page=100&page=%s",
+            "https://api.github.com/search/repositories?q=topic:%s&sort=updated&order=desc&per_page=100&page=%s",
             cap,
             tag,
             1
@@ -193,7 +193,7 @@ class RepoManager:
     # Search all repos by language
     def get_repos_by_language(self, language, cap=0):
         return self.get_repos_by_url(
-            "https://api.github.com/search/repositories?q=language:%s&sort=-stars&order=desc&per_page=100&page=%s",
+            "https://api.github.com/search/repositories?q=language:%s&sort=updated&order=desc&per_page=100&page=%s",
             cap,
             language,
             1
@@ -230,7 +230,6 @@ class RepoManager:
             else:
                 querying = False
 
-        # convert the above for loop to a one liner
         commits = [c for commit in commits for c in commit]
 
         return commits
