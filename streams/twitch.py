@@ -117,7 +117,7 @@ class TwitchManager:
         self.stream_calls[url] = res
         return self.stream_calls[url]
 
-    def get_stream_by_user(self, user_id):
+    def get_streams_by_user(self, user_id):
         url = f"https://api.twitch.tv/helix/streams?first=100&user_id={user_id}"
 
         if url in self.stream_calls:
