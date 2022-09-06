@@ -35,7 +35,7 @@ class JobManager:
         # Retrieve repos every 12 hours
         scheduler.add_job(
             retrieve_repos,
-            trigger=CronTrigger(second="*/59"),
+            trigger=CronTrigger(minute="*/59"),
             id="retrieve_repos",
             max_instances=1,
             replace_existing=True,
