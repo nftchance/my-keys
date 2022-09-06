@@ -4,6 +4,8 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
+from streams.twitch import TWITCH_CLIENT_ID
+
 load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -120,6 +122,9 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 ALCHEMY_KEY = os.environ.get("ALCHEMY_KEY")
 GITHUB_AUTH_TOKEN = os.environ.get("GITHUB_AUTH_TOKEN")
+
+TWITCH_CLIENT_ID = os.environ.get("TWITCH_CLIENT_ID")
+TWITCH_SECRET = os.environ.get("TWITCH_SECRET")
 
 LOGGING = {
     'version': 1,
