@@ -2,38 +2,89 @@ from django.test import TestCase
 
 from streams.twitch import TwitchManager
 
+
 class TwitchTestCase(TestCase):
     def setUp(self):
         self.twitch_manager = TwitchManager()
 
     def test_get_user(self):
         user = self.twitch_manager.get_user("44322889")
+        self.assertEqual(user["id"], "44322889")
 
-        self.assertEqual(user["data"][0]["id"], "44322889")
+    def test_get_game_id(self):
+        game_id = self.twitch_manager.get_game_id("Science & Technology")
+
+        self.assertEqual(game_id, "509670")
+
+        game_id = self.twitch_manager.get_game_id(
+            "Software and Game Development")
+
+        self.assertEqual(game_id, "1469308723")
 
     def test_get_game(self):
         game = self.twitch_manager.get_game("21779")
 
-        self.assertEqual(game["data"][0]["id"], "21779")
+        self.assertEqual(game["id"], "21779")
 
     def test_get_tag(self):
-        tag = self.twitch_manager.get_tag("6ea6bca4-4712-4ab9-a906-e3336a9d8039")
-
-        self.assertEqual(tag["data"][0]["tag_id"], "6ea6bca4-4712-4ab9-a906-e3336a9d8039")
+        streams = self.twitch_manager.get_tag(
+            "6ea6bca4-4712-4ab9-a906-e3336a9d8039")
+        self.assertEqual(streams[0]["tag_id"],
+                         "6ea6bca4-4712-4ab9-a906-e3336a9d8039")
 
     def test_get_category(self):
-        category = self.twitch_manager.get_category("509658")
-
-        self.assertEqual(category["data"][0]["id"], "509658")
-
-    def test_get_vods(self):
-        streams = self.twitch_manager.get_vods("44322889")
-
-        print(streams)
-
-        self.assertEqual(streams["data"][0]["user_id"], "44322889")
+        streams = self.twitch_manager.get_category("509658")
+        self.assertEqual(streams[0]["game_id"], "509658")
 
     def test_get_streams(self):
         streams = self.twitch_manager.get_streams()
 
         self.assertNotEqual(len(streams), 0)
+
+    def test_get_live_streams(self):
+        streams = self.twitch_manager.get_live_streams()
+
+        self.assertNotEqual(len(streams), 0)
+
+    def test_get_filtered_steams(self):
+        streams = self.twitch_manager.get_filtered_streams()
+
+        self.assertNotEqual(len(streams), None)
+
+    def test_get_clip(self):
+        clip = self.twitch_manager.get_clip(
+            "PerfectBitterBillBibleThump-1ao_vXD0XXBRUbe0")
+
+        self.assertEqual(clip["id"], "586008086")
+
+    def test_get_clips(self):
+        # user id, period, limit
+        clips = self.twitch_manager.get_clips("dallas", "LAST_MONTH", 10)
+
+        self.assertNotEqual(len(clips), 0)
+
+    def test_get_video(self):
+        video = self.twitch_manager.get_video("1583537172")
+
+        self.assertEqual(video["id"], "1583537172")
+    
+    def test_get_videos(self):
+        videos = self.twitch_manager.get_videos("dallas", 10, "views")
+
+        self.assertNotEqual(len(videos), 0)
+
+    def test_get_playlists_with_no_auth_token(self):
+        video_id = "1583537172"
+        access_token = self.twitch_manager.get_gql_access_token(video_id)
+
+        playlists = self.twitch_manager.get_playlists(video_id, access_token)
+
+        self.assertNotEqual(len(playlists), 0)
+
+    def test_clips_generator(self):
+        generator = self.twitch_manager.clips_generator("xqc", "LAST_MONTH", 10)
+        self.assertNotEqual(len(generator), 0)
+
+    def test_videos_generator(self):
+        total_count, generator = self.twitch_manager.videos_generator("xqc", 100, "views", "archive")
+        self.assertNotEqual(len(generator), 0)
