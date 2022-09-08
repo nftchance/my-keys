@@ -67,7 +67,7 @@ class TwitchTestCase(TestCase):
         video = self.twitch_manager.get_video("1583537172")
 
         self.assertEqual(video["id"], "1583537172")
-    
+
     def test_get_videos(self):
         videos = self.twitch_manager.get_videos("dallas", 10, "views")
 
@@ -82,9 +82,11 @@ class TwitchTestCase(TestCase):
         self.assertNotEqual(len(playlists), 0)
 
     def test_clips_generator(self):
-        generator = self.twitch_manager.clips_generator("xqc", "LAST_MONTH", 10)
+        generator = self.twitch_manager.clips_generator(
+            "xqc", "LAST_MONTH", 10)
         self.assertNotEqual(len(generator), 0)
 
     def test_videos_generator(self):
-        total_count, generator = self.twitch_manager.videos_generator("xqc", 100, "views", "archive")
+        total_count, generator = self.twitch_manager.videos_generator(
+            "xqc", 100, "views", "archive")
         self.assertNotEqual(len(generator), 0)

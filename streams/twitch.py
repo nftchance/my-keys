@@ -14,15 +14,15 @@ GQL_CLIENT_ID = "kimne78kx3ncx6brgo4mv6wki5h1ko"
 
 
 class HTTPError(Exception):
-    def __init__(self, errors):
-        super().__init__("HTTP request failed")
+    def __init__(self, errors="HTTP request failed"):
         self.errors = errors
+        super().__init__(errors)
 
 
 class GQLError(Exception):
-    def __init__(self, errors):
-        super().__init__("GraphQL query failed")
+    def __init__(self, errors="GraphQL query failed"):
         self.errors = errors
+        super().__init__(errors)
 
 
 class TwitchManager:
