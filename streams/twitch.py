@@ -507,4 +507,4 @@ class TwitchManager:
 
         limit = min(max_videos, 100)
         videos = self.get_videos(channel_id, limit, sort, type, game_ids)
-        return videos["totalCount"], _generator(videos, max_videos)
+        return videos["totalCount"], list(_generator(videos, max_videos))
