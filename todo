@@ -1,0 +1,8 @@
+☐ integrate the database with the downloading of clips and videos
+    ☐ because we are going to support multiple formats of video, we need a generalized encoder schema
+☐ implement the ability to search for keys in a video source
+☐ implement the jobs that run checking for any .mp4 or .ts in the tmp/ folder 
+☐ implement serializer for database model
+☐ implement rest framework support for the stream models
+    ☐ Streamer
+    ☐ Stream
