@@ -71,10 +71,7 @@ async def download(
     progress: Progress,
     token_bucket: AnyTokenBucket,
 ):
-    # Download to a temp file first, then copy to target when over to avoid
-    # getting saving chunks which may persist if canceled or --keep is used
-    tmp_target = f"{target}.tmp"
-    with open(tmp_target, "wb") as f:
+    with open(target, "wb") as f:
         async with client.stream("GET", source) as response:
             size = int(response.headers.get("content-length"))
             progress.start(task_id, size)
@@ -84,8 +81,6 @@ async def download(
                 token_bucket.advance(size)
                 progress.advance(task_id, size)
             progress.end(task_id)
-        os.rename(tmp_target, target)
-
 
 async def download_with_retries(
     client: httpx.AsyncClient,
@@ -106,7 +101,7 @@ async def download_with_retries(
             try:
                 return await download(client, task_id, source, target, progress, token_bucket)
             except httpx.RequestError:
-                logger.exception("Task {task_id} failed. Retrying. Maybe.")
+                print("Task {task_id} failed. Retrying. Maybe.")
                 progress.abort(task_id)
                 if n + 1 >= RETRY_COUNT:
                     raise
@@ -124,6 +119,7 @@ async def download_all(
     progress = Progress(len(sources))
     token_bucket = TokenBucket(
         rate_limit) if rate_limit else EndlessTokenBucket()
+
     async with httpx.AsyncClient(timeout=TIMEOUT) as client:
         semaphore = asyncio.Semaphore(workers)
         tasks = [download_with_retries(client, semaphore, task_id, source, target, progress, token_bucket)

@@ -3,15 +3,10 @@ import httpx
 import m3u8
 import os
 import re
-import shutil
-import subprocess
-import tempfile
 
 from os import path
 from pathlib import Path
-from typing import List, Optional, OrderedDict
 from urllib.parse import urlparse, urlencode
-
 
 from streams import twitch, utils
 from .http import download_all
@@ -25,20 +20,18 @@ class DownloadFailed(Exception):
     pass
 
 
-def _download(self, url: str, path: str):
-    tmp_path = path + ".tmp"
+def _download(url, path):
     size = 0
     with httpx.stream("GET", url, timeout=CONNECT_TIMEOUT) as response:
-        with open(tmp_path, "wb") as target:
+        with open(path, "wb") as target:
             for chunk in response.iter_bytes(chunk_size=CHUNK_SIZE):
                 target.write(chunk)
                 size += len(chunk)
 
-    os.rename(tmp_path, path)
     return size
 
 
-def download_file(self, url: str, path: str, retries: int = RETRY_COUNT):
+def download_file(url: str, path: str, retries: int = RETRY_COUNT):
     if os.path.exists(path):
         from_disk = True
         return (os.path.getsize(path), from_disk)
@@ -46,7 +39,7 @@ def download_file(self, url: str, path: str, retries: int = RETRY_COUNT):
     from_disk = False
     for _ in range(retries):
         try:
-            return (self._download(url, path), from_disk)
+            return (_download(url, path), from_disk)
         except httpx.RequestError:
             pass
 
@@ -54,13 +47,18 @@ def download_file(self, url: str, path: str, retries: int = RETRY_COUNT):
 
 
 class DownloadManager:
+    def __init__(self):
+        self.twitch_manager = twitch.TwitchManager()
+        super().__init__()
+
     def _parse_playlists(self, playlists_m3u8):
         playlists = m3u8.loads(playlists_m3u8)
 
         for p in sorted(playlists.playlists, key=lambda p: p.stream_info.resolution is None):
             if p.stream_info.resolution:
                 name = p.media[0].name
-                description = "x".join(str(r) for r in p.stream_info.resolution)
+                description = "x".join(str(r)
+                                       for r in p.stream_info.resolution)
             else:
                 name = p.media[0].group_id
                 description = None
@@ -82,26 +80,6 @@ class DownloadManager:
 
         raise Exception(msg)
 
-    def _join_vods(self, playlist_path, target, overwrite, video):
-        command = [
-            "ffmpeg",
-            "-i", playlist_path,
-            "-c", "copy",
-            "-metadata", "artist={}".format(video["creator"]["displayName"]),
-            "-metadata", "title={}".format(video["title"]),
-            "-metadata", "encoded_by=twitch-dl",
-            "-stats",
-            "-loglevel", "warning",
-            "file:{}".format(target),
-        ]
-
-        if overwrite:
-            command.append("-y")
-
-        result = subprocess.run(command)
-        if result.returncode != 0:
-            raise Exception("Joining files failed")
-
     def _video_target_filename(self, video, args):
         date, time = video['publishedAt'].split("T")
         game = video["game"]["name"] if video["game"] else "Unknown"
@@ -111,7 +89,7 @@ class DownloadManager:
             "channel_login": video["creator"]["login"],
             "date": date,
             "datetime": video["publishedAt"],
-            "format": args.format,
+            "format": args["format"],
             "game": game,
             "game_slug": utils.slugify(game),
             "id": video["id"],
@@ -121,7 +99,7 @@ class DownloadManager:
         }
 
         try:
-            return args.output.format(**subs)
+            return args["output"].format(**subs)
         except KeyError as e:
             supported = ", ".join(subs.keys())
             raise Exception(
@@ -151,13 +129,13 @@ class DownloadManager:
         }
 
         try:
-            return args.output.format(**subs)
+            return args['output'].format(**subs)
         except KeyError as e:
             supported = ", ".join(subs.keys())
             raise Exception(
                 "Invalid key {} used in --output. Supported keys are: {}".format(e, supported))
 
-    def _get_vod_paths(self, playlist, start: Optional[int], end: Optional[int]) -> List[str]:
+    def _get_vod_paths(self, playlist, start, end):
         """Extract unique VOD paths for download from playlist."""
         files = []
         vod_start = 0
@@ -179,7 +157,9 @@ class DownloadManager:
     def _crete_temp_dir(self, base_uri: str) -> str:
         """Create a temp dir to store downloads if it doesn't exist."""
         path = urlparse(base_uri).path.lstrip("/")
-        temp_dir = Path(tempfile.gettempdir(), "twitch-dl", path)
+
+        temp_dir = Path("tmp", path)
+
         temp_dir.mkdir(parents=True, exist_ok=True)
         return str(temp_dir)
 
@@ -221,7 +201,7 @@ class DownloadManager:
         return selected_quality["sourceURL"]
 
     def get_clip_authenticated_url(self, slug, quality):
-        access_token = twitch.get_clip_access_token(slug)
+        access_token = self.twitch_manager.get_clip_access_token(slug)
 
         if not access_token:
             raise Exception(
@@ -237,7 +217,7 @@ class DownloadManager:
         return "{}?{}".format(url, query)
 
     def _download_clip(self, slug: str, args) -> None:
-        clip = twitch.get_clip(slug)
+        clip = self.twitch_manager.get_clip(slug)
         game = clip["game"]["name"] if clip["game"] else "Unknown"
 
         if not clip:
@@ -245,39 +225,40 @@ class DownloadManager:
 
         target = self._clip_target_filename(clip, args)
 
-        if not args.overwrite and path.exists(target):
+        if not args["overwrite"] and path.exists(target):
             response = input("File exists. Overwrite? [Y/n]: ")
             if response.lower().strip() not in ["", "y"]:
                 raise Exception("Aborted")
-            args.overwrite = True
+            args["overwrite"] = True
 
-        url = self.get_clip_authenticated_url(slug, args.quality)
+        url = self.get_clip_authenticated_url(slug, args["quality"])
 
         download_file(url, target)
 
     def _download_video(self, video_id, args) -> None:
-        if args.start and args.end and args.end <= args.start:
+        if args['start'] and args['end'] and args['end'] <= args['start']:
             raise Exception("End time must be greater than start time")
 
-        video = twitch.get_video(video_id)
+        video = self.twitch_manager.get_video(video_id)
 
         if not video:
             raise Exception("Video {} not found".format(video_id))
 
         target = self._video_target_filename(video, args)
 
-        if not args.overwrite and path.exists(target):
+        if not args["overwrite"] and path.exists(target):
             response = input("File exists. Overwrite? [Y/n]: ")
             if response.lower().strip() not in ["", "y"]:
                 raise Exception("Aborted")
-            args.overwrite = True
+            args["overwrite"] = True
 
-        access_token = twitch.get_access_token(
-            video_id, auth_token=args.auth_token)
+        access_token = self.twitch_manager.get_gql_access_token(
+            video_id, auth_token=args["auth_token"])
 
-        playlists_m3u8 = twitch.get_playlists(video_id, access_token)
+        playlists_m3u8 = self.twitch_manager.get_playlists(
+            video_id, access_token)
         playlists = list(self._parse_playlists(playlists_m3u8))
-        playlist_uri = (self._get_playlist_by_name(playlists, args.quality))
+        playlist_uri = (self._get_playlist_by_name(playlists, args["quality"]))
 
         response = httpx.get(playlist_uri)
         response.raise_for_status()
@@ -285,39 +266,10 @@ class DownloadManager:
 
         base_uri = re.sub("/[^/]+$", "/", playlist_uri)
         target_dir = self._crete_temp_dir(base_uri)
-        vod_paths = self._get_vod_paths(playlist, args.start, args.end)
-
-        # Save playlists for debugging purposes
-        with open(path.join(target_dir, "playlists.m3u8"), "w") as f:
-            f.write(playlists_m3u8)
-        with open(path.join(target_dir, "playlist.m3u8"), "w") as f:
-            f.write(response.text)
+        vod_paths = self._get_vod_paths(playlist, args["start"], args["end"])
 
         sources = [base_uri + path for path in vod_paths]
         targets = [os.path.join(target_dir, "{:05d}.ts".format(
             k)) for k, _ in enumerate(vod_paths)]
         asyncio.run(download_all(sources, targets,
-                    args.max_workers, rate_limit=args.rate_limit))
-
-        # Make a modified playlist which references downloaded VODs
-        # Keep only the downloaded segments and skip the rest
-        org_segments = playlist.segments.copy()
-
-        path_map = OrderedDict(zip(vod_paths, targets))
-        playlist.segments.clear()
-        for segment in org_segments:
-            if segment.uri in path_map:
-                segment.uri = path_map[segment.uri]
-                playlist.segments.append(segment)
-
-        playlist_path = path.join(target_dir, "playlist_downloaded.m3u8")
-        playlist.dump(playlist_path)
-
-        if args.no_join:
-            return
-
-        # Merge downloaded VODs into a single file
-        self._join_vods(playlist_path, target, args.overwrite, video)
-
-        # Delete temporary files
-        shutil.rmtree(target_dir)
+                    args["max_workers"], rate_limit=args["rate_limit"]))

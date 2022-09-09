@@ -1,5 +1,6 @@
 from django.test import TestCase
 
+from streams.download import DownloadManager
 from streams.twitch import TwitchManager
 
 
@@ -90,3 +91,36 @@ class TwitchTestCase(TestCase):
         total_count, generator = self.twitch_manager.videos_generator(
             "xqc", 100, "views", "archive")
         self.assertNotEqual(len(generator), 0)
+
+
+class DownloadManagerTestCase(TestCase):
+    def setUp(self):
+        self.download_manager = DownloadManager()
+
+    def test_download(self):
+        self.download_manager.download_one("1585732109", {
+            "start": None,
+            "end": None,
+            "overwrite": True,
+            "format": "mp4",
+            "output": "{channel}_{id}.{format}",
+            "auth_token": None,
+            "quality": "source",
+            "max_workers": 15,
+            "rate_limit": None,
+            "no_join": False
+        })
+
+    def test_download_clip(self):
+        self.download_manager.download_one("StrangeSourCoyoteYee-Nc_r1-iZkEy_DfBe", {
+            "start": None,
+            "end": None,
+            "overwrite": True,
+            "format": "mp4",
+            "output": "tmp/{channel}_{id}.{format}",
+            "auth_token": None,
+            "quality": "source",
+            "max_workers": 15,
+            "rate_limit": None,
+            "no_join": False
+        })
