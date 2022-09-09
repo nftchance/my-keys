@@ -96,31 +96,34 @@ class TwitchTestCase(TestCase):
 class DownloadManagerTestCase(TestCase):
     def setUp(self):
         self.download_manager = DownloadManager()
+        self.run_downloads = False
 
     def test_download(self):
-        self.download_manager.download_one("1585732109", {
-            "start": None,
-            "end": None,
-            "overwrite": True,
-            "format": "mp4",
-            "output": "{channel}_{id}.{format}",
-            "auth_token": None,
-            "quality": "source",
-            "max_workers": 15,
-            "rate_limit": None,
-            "no_join": False
-        })
+        if self.run_downloads:
+            self.download_manager.download_one("1585732109", {
+                "start": None,
+                "end": None,
+                "overwrite": True,
+                "format": "mp4",
+                "output": "{channel}_{id}.{format}",
+                "auth_token": None,
+                "quality": "source",
+                "max_workers": 15,
+                "rate_limit": None,
+                "no_join": False
+            })
 
     def test_download_clip(self):
-        self.download_manager.download_one("StrangeSourCoyoteYee-Nc_r1-iZkEy_DfBe", {
-            "start": None,
-            "end": None,
-            "overwrite": True,
-            "format": "mp4",
-            "output": "tmp/{channel}_{id}.{format}",
-            "auth_token": None,
-            "quality": "source",
-            "max_workers": 15,
-            "rate_limit": None,
-            "no_join": False
-        })
+        if self.run_downloads:
+            self.download_manager.download_one("StrangeSourCoyoteYee-Nc_r1-iZkEy_DfBe", {
+                "start": None,
+                "end": None,
+                "overwrite": True,
+                "format": "mp4",
+                "output": "tmp/{channel}_{id}.{format}",
+                "auth_token": None,
+                "quality": "source",
+                "max_workers": 15,
+                "rate_limit": None,
+                "no_join": False
+            })

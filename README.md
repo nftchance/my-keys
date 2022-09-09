@@ -16,11 +16,12 @@ A massive amount of data is stored locally. I highly advise not running this on 
 setup .env to mirror example.env
 python -m venv venv
 venv\Scripts\Activate.ps1
+
 pip install -r requirements.txt
+
 python manage.py migrate
+python manage.py test
 python manage.py runserver
-python sync_repos.py
-python sync_keys.py
 ```
 
 ## Targets
@@ -28,4 +29,11 @@ python sync_keys.py
 - [x] GitHub repos
 - [ ] (Generalized) repository framework
 - [ ] Twitch
-- [ ] YouTube Live Streams
+    - [ ] Live Streams
+    - [ ] Clips
+    - [ ] Vods
+
+## Notes
+
+- While there is functional code to download twitch files and manage them within Python instead of a broken CLI, the output files are not currently in a state intended for human consumption. Hence, the location of `tmp` as the base architecture.
+    - This is also why these files are not in your systems temp file as things often crash and it is easier to have access here especially because the odds are high that you want to do something more with them than be forced to store things in odd places.   
